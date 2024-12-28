@@ -437,7 +437,7 @@ void vfd_init (void)
         vfd_nowforever_init();
 #endif
 
-#if SPINDLE_ENABLE & (1<<SPINDLE_PICOHAL_VFD)
+#if SPINDLE_ENABLE & (1<<SPINDLE_PICOHAL)
         extern void vfd_picohal_init (void);
         vfd_picohal_init();
 #endif

@@ -65,7 +65,7 @@ static void spindleSetRPM (float rpm, bool block)
             .crc_check = false,
             .adu[0] = modbus_address,
             .adu[1] = ModBus_WriteRegister,
-            .adu[2] = 0x09, //register address MSB
+            .adu[2] = 0x02, //register address MSB
             .adu[3] = 0x01, //register address LSB
             .adu[4] = power >> 8,
             .adu[5] = power & 0xFF,
@@ -75,7 +75,7 @@ static void spindleSetRPM (float rpm, bool block)
 
         modbus_send(&rpm_cmd, &callbacks, block);
 
-        spindle_set_at_speed_range(spindle_hal, &spindle_data, rpm); //does this need to be here?
+        //spindle_set_at_speed_range(spindle_hal, &spindle_data, rpm); //does this need to be here?
     }
 }
 
@@ -92,7 +92,7 @@ static void spindleSetState (spindle_ptrs_t *spindle, spindle_state_t state, flo
         .crc_check = false,
         .adu[0] = modbus_address,
         .adu[1] = ModBus_WriteRegister,
-        .adu[2] = 0x09,
+        .adu[2] = 0x02,
         .adu[3] = 0x00,
         .adu[4] = 0x00,
         .adu[5] = (!state.on || rpm == 0.0f) ? 0x00 : (state.ccw ? 0x03 : 0x01),
@@ -145,6 +145,7 @@ static void rx_packet (modbus_message_t *msg)
         switch((vfd_response_t)msg->context) {
 
             case VFD_GetRPM:
+                //RPM = ((msg->adu[3] << 8) | msg->adu[4])
                 break;
 
             default:
@@ -184,9 +185,7 @@ static void onSpindleSelected (spindle_ptrs_t *spindle)
         spindle_data.rpm_programmed = -1.0f;
 
         modbus_set_silence(NULL);
-        modbus_address = vfd_get_modbus_address(spindle_id);
-
-        spindleGetRPMRange();
+        modbus_address = 10; //vfd_get_modbus_address(spindle_id);
 
     } else
         spindle_hal = NULL;
@@ -213,7 +212,7 @@ void vfd_picohal_init (void)
     static const vfd_spindle_ptrs_t vfd = {
         .spindle = {
             .type = SpindleType_VFD,
-            .ref_id = SPINDLE_PICOHAL_VFD,
+            .ref_id = SPINDLE_PICOHAL,
             .cap = {
                 .variable = On,
                 .at_speed = On,
