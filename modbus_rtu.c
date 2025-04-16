@@ -173,6 +173,9 @@ static void modbus_poll (void *data)
         case ModBus_AwaitReply:
             if(rx_timeout && --rx_timeout == 0) {
                 if(packet->async) {
+                    if(packet->callbacks.on_rx_exception) {
+                        packet->callbacks.on_rx_exception(0, packet->msg.context);
+                    }
                     state = ModBus_Silent;
                     packet = NULL;
                 } else if(stream.read() == packet->msg.adu[0] && (stream.read() & 0x80)) {
